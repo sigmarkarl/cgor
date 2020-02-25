@@ -15,7 +15,7 @@ Compile or Install libdeflate
 
 ## Compile
 
-* Compile cgor on Mac: g++ -std=c++11 -O3 -lz gor.cc -o cgor
+* Compile cgor: g++ -std=c++11 -O3 -lz gor.cc -o cgor
 * Compile cgor on Mac using libdeflate: g++ -std=c++11 -O3 -DLIBDEFLATE -L/usr/local/lib -I/usr/local/include -lz -ldeflate gor.cc -o cgor
 
 ## Usage
