@@ -1,5 +1,11 @@
 # cgor
 
+## Introduction
+
+Read and write files in .gorz format. 
+Support for reading column compressed .gorz is preliminary.
+No support for writing column compressed .gorz.
+
 ## Prerequisite
 
 Compile or Install libdeflate
@@ -11,3 +17,9 @@ Compile or Install libdeflate
 ## Compile
 
 * Compile cgor on Mac: g++ -O3 -L/usr/local/lib -I/usr/local/include -lz -ldeflate gor.cc -o cgor
+
+## Usage
+
+read: ./cgor dbsnp.gorz
+seek: ./cgor -p chr2 dbsnp.gorz | head
+write: cat dbsnp.gor | ./cgor -o > dbsnp.gorz
