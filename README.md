@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Read and write files in .gorz format (https://github.com:gorpipe/gor.git). 
+Read and write files in .gorz format (see. https://github.com/gorpipe/gor.git). 
 Support for reading column compressed .gorz is preliminary.
 No support for writing column compressed .gorz.
 
