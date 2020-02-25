@@ -8,7 +8,8 @@
 
 using namespace std;
 
-int oldinflate(const void *src, int srcLen, void *dst, int dstLen) {
+#ifndef LIBDEFLATE
+int inflate(const void *src, int srcLen, void *dst, int dstLen) {
     z_stream strm  = {0};
     strm.total_in  = strm.avail_in  = srcLen;
     strm.total_out = strm.avail_out = dstLen;
@@ -42,6 +43,42 @@ int oldinflate(const void *src, int srcLen, void *dst, int dstLen) {
     return ret;
 }
 
+int deflate(const void *src, int srcLen, void *dst, int dstLen) {
+    z_stream strm  = {0};
+    strm.avail_in  = strm.avail_in  = srcLen;
+    strm.avail_out = strm.avail_out = dstLen;
+    strm.next_in   = (Bytef *) src;
+    strm.next_out  = (Bytef *) dst;
+
+    strm.zalloc = Z_NULL;
+    strm.zfree  = Z_NULL;
+    strm.opaque = Z_NULL;
+
+    int err = -1;
+    int ret = -1;
+
+	int windowsBits = 15;
+	int GZIP_ENCODING = 0;
+
+    err = deflateInit2(&strm, Z_BEST_SPEED, Z_DEFLATED, windowsBits | GZIP_ENCODING, 8, Z_DEFAULT_STRATEGY);
+    if (err == Z_OK) {
+        err = deflate(&strm, Z_FINISH);
+        if (err == Z_STREAM_END) {
+            ret = strm.total_out;
+        }
+        else {
+             deflateEnd(&strm);
+             return err;
+        }
+    } else {
+        deflateEnd(&strm);
+        return err;
+    }
+
+    deflateEnd(&strm);
+    return ret;
+}
+#else
 struct libdeflate_decompressor *d;
 struct libdeflate_compressor *c;
 
@@ -50,6 +87,11 @@ int inflate(const void *src, int srcLen, void *dst, int dstLen) {
     libdeflate_result res = libdeflate_zlib_decompress(d, src, srcLen, dst, dstLen, &ret);
     return ret;
 }
+
+int deflate(const void *src, int srcLen, void *dst, int dstLen) {
+	return libdeflate_zlib_compress(c, src, srcLen, dst, dstLen);
+}
+#endif
 
 int to8BitInplace(char* ba, int off, int length) {
     int end = off+length-1;
@@ -761,8 +803,10 @@ int decode(char* src, int off, char* dest, int destOffset, map<int, map<int, cha
 
 int main( int argc, char* argv[] ) {
 	if( strcmp( argv[1], "-o" ) == 0 ) {
+#ifdef LIBDEFLATE
 		c = libdeflate_alloc_compressor(1);
 		if (c == NULL) return 1;
+#endif
 
 		char	buffer[32768];
 		char	dst[32768];
@@ -791,7 +835,7 @@ int main( int argc, char* argv[] ) {
 
 			fwrite(&buffer[k+1], 1, t-k, stdout);
 
-			size_t res = libdeflate_zlib_compress(c, buffer+start, i+1-start, dst, sizeof(dst));
+			size_t res = deflate(buffer+start, i+1-start, dst, sizeof(dst));
 			enc[0] = 0;
 			int sbsize = to7Bit(dst, res, enc+1)+1;
 			enc[sbsize] = '\n';
@@ -807,8 +851,10 @@ int main( int argc, char* argv[] ) {
 			while(buffer[++end] != '\t');
 		}
 	} else {
+#ifdef LIBDEFLATE
 		d = libdeflate_alloc_decompressor();
 		if (d == NULL) return 1;
+#endif
 
 		if( strcmp( argv[1], "-p" ) == 0 ) {
 			char	buffer[100000];
@@ -1033,8 +1079,9 @@ int main( int argc, char* argv[] ) {
 			}
 			fclose( f );
 		}
-
+#ifdef LIBDEFLATE
 		libdeflate_free_decompressor(d);
+#endif
 	}
 	return 0;
 }

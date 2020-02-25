@@ -6,7 +6,7 @@ Read and write files in .gorz format (see. https://github.com/gorpipe/gor.git).
 Support for reading column compressed .gorz is preliminary.
 No support for writing column compressed .gorz.
 
-## Prerequisite
+## Prerequisite if using libdeflate
 
 Compile or Install libdeflate
 * Compile:  git clone https://github.com/ebiggers/libdeflate  
@@ -16,7 +16,8 @@ Compile or Install libdeflate
 
 ## Compile
 
-* Compile cgor on Mac: g++ -O3 -L/usr/local/lib -I/usr/local/include -lz -ldeflate gor.cc -o cgor
+* Compile cgor on Mac: g++ -std=c++11 -O3 -lz gor.cc -o cgor
+* Compile cgor on Mac using libdeflate: g++ -std=c++11 -O3 -DLIBDEFLATE -L/usr/local/lib -I/usr/local/include -lz -ldeflate gor.cc -o cgor
 
 ## Usage
 
