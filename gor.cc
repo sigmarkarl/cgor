@@ -802,7 +802,7 @@ int decode(char* src, int off, char* dest, int destOffset, map<int, map<int, cha
 }
 
 int main( int argc, char* argv[] ) {
-	if( strcmp( argv[1], "-o" ) == 0 ) {
+	if( strcmp( argv[1], "-c" ) == 0 ) {
 #ifdef LIBDEFLATE
 		c = libdeflate_alloc_compressor(1);
 		if (c == NULL) return 1;

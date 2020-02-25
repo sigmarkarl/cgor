@@ -22,4 +22,4 @@ Compile or Install libdeflate
 
 read: ./cgor dbsnp.gorz  
 seek: ./cgor -p chr2 dbsnp.gorz | head  
-write: cat dbsnp.gor | ./cgor -o > dbsnp.gorz  
+write: cat dbsnp.gor | ./cgor -c > dbsnp.gorz  
