@@ -22,11 +22,26 @@ brew install libdeflate
 
 ## Compile
 
-* Compile cgor: g++ -std=c++11 -O3 -lz gor.cc -o cgor
-* Compile cgor on Mac using libdeflate: g++ -std=c++11 -O3 -DLIBDEFLATE -L/usr/local/lib -I/usr/local/include -lz -ldeflate gor.cc -o cgor
+* Compile cgor: 
+```bash
+g++ -std=c++11 -O3 -lz gor.cc -o cgor
+```
+* Compile cgor on Mac using libdeflate: 
+```bash
+g++ -std=c++11 -O3 -DLIBDEFLATE -L/usr/local/lib -I/usr/local/include -lz -ldeflate gor.cc -o cgor
+```
 
 ## Usage
 
-read: ./cgor dbsnp.gorz  
-seek: ./cgor -p chr2 dbsnp.gorz | head  
-write: cat dbsnp.gor | ./cgor -c > dbsnp.gorz  
+read: 
+```bash
+./cgor dbsnp.gorz
+```
+seek:
+```bash
+./cgor -p chr2 dbsnp.gorz | head
+```
+write:
+```bash
+cat dbsnp.gor | ./cgor -c > dbsnp.gorz
+```
