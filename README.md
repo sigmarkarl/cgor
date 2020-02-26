@@ -28,7 +28,7 @@ g++ -std=c++11 -O3 -lz gor.cc -o cgor
 ```
 * Compile cgor on Mac using libdeflate: 
 ```bash
-g++ -std=c++11 -O3 -DLIBDEFLATE -L/usr/local/lib -I/usr/local/include -lz -ldeflate gor.cc -o cgor
+g++ -std=c++11 -O3 -DLIBDEFLATE -L/usr/local/lib -I/usr/local/include -ldeflate gor.cc -o cgor
 ```
 
 ## Usage
