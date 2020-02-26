@@ -849,7 +849,7 @@ extern "C" int write_gorz(FILE* in, FILE* out) {
 		start = 0;
 		siz = fread(buffer+restlen, 1, sizeof(buffer)-restlen, in)+restlen;
 		end = start;
-		while(buffer[++end] != '\t');
+		while(end < siz-1 && buffer[++end] != '\t');
 	}
 	return 0;
 }
