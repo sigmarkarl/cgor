@@ -6,6 +6,8 @@
 #include <map>
 #include <vector>
 
+#include "gor.h"
+
 using namespace std;
 
 #ifndef LIBDEFLATE
@@ -801,56 +803,60 @@ int decode(char* src, int off, char* dest, int destOffset, map<int, map<int, cha
 	return dp;
 }
 
+extern "C" int write_gorz(FILE* in, FILE* out) {
+#ifdef LIBDEFLATE
+	c = libdeflate_alloc_compressor(1);
+	if (c == NULL) return 1;
+#endif
+	char	buffer[32768];
+	char	dst[32768];
+	char	enc[32768];
+	size_t siz = fread(buffer, 1, sizeof(buffer), in);
+	int start = 0;
+	while(buffer[start++] != '\n');
+	fwrite(buffer, 1, start, out);
+
+	int end = start;
+	while(buffer[++end] != '\t');
+
+	while( siz > 0 ) {
+		int k = siz;
+		int i,t,n;
+
+		while(buffer[--k] != '\n');
+
+		do {
+			i = k;
+			while(buffer[--k] != '\n');
+			t = k;
+			while(buffer[++t] != '\t');
+			n = t;
+			while(buffer[++t] != '\t');
+		} while(memcmp(buffer+start, buffer+k+1, max(end-start,n-k-1))!=0);
+
+		fwrite(&buffer[k+1], 1, t-k, out);
+
+		size_t res = deflate(buffer+start, i+1-start, dst, sizeof(dst));
+		enc[0] = 0;
+		int sbsize = to7Bit(dst, res, enc+1)+1;
+		enc[sbsize] = '\n';
+
+		fwrite(enc, 1, sbsize+1, out);
+
+		int restlen = siz-i-1;
+		memcpy(buffer, buffer+i+1, restlen);
+
+		start = 0;
+		siz = fread(buffer+restlen, 1, sizeof(buffer)-restlen, in)+restlen;
+		end = start;
+		while(buffer[++end] != '\t');
+	}
+	return 0;
+}
+
 int main( int argc, char* argv[] ) {
 	if( strcmp( argv[1], "-c" ) == 0 ) {
-#ifdef LIBDEFLATE
-		c = libdeflate_alloc_compressor(1);
-		if (c == NULL) return 1;
-#endif
-
-		char	buffer[32768];
-		char	dst[32768];
-		char	enc[32768];
-		size_t siz = fread(buffer, 1, sizeof(buffer), stdin);
-		int start = 0;
-		while(buffer[start++] != '\n');
-		fwrite(buffer, 1, start, stdout);
-
-		int end = start;
-		while(buffer[++end] != '\t');
-
-		while( siz > 0 ) {
-			int k = siz;
-			int i,t,n;
-
-			while(buffer[--k] != '\n');
-
-			do {
-				i = k;
-				while(buffer[--k] != '\n');
-				t = k;
-				while(buffer[++t] != '\t');
-				n = t;
-				while(buffer[++t] != '\t');
-			} while(memcmp(buffer+start, buffer+k+1, max(end-start,n-k-1))!=0);
-
-			fwrite(&buffer[k+1], 1, t-k, stdout);
-
-			size_t res = deflate(buffer+start, i+1-start, dst, sizeof(dst));
-			enc[0] = 0;
-			int sbsize = to7Bit(dst, res, enc+1)+1;
-			enc[sbsize] = '\n';
-
-			fwrite(enc, 1, sbsize+1, stdout);
-
-			int restlen = siz-i-1;
-			memcpy(buffer, buffer+i+1, restlen);
-
-			start = 0;
-			siz = fread(buffer+restlen, 1, sizeof(buffer)-restlen, stdin)+restlen;
-			end = start;
-			while(buffer[++end] != '\t');
-		}
+		return write_gorz(stdin, stdout);
 	} else {
 #ifdef LIBDEFLATE
 		d = libdeflate_alloc_decompressor();
