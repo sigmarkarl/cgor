@@ -820,17 +820,18 @@ int main( int argc, char* argv[] ) {
 		while(buffer[++end] != '\t');
 
 		while( siz > 0 ) {
-			int i = siz;
-			int k,t,n;
+			int k = siz;
+			int i,t,n;
+
+			while(buffer[--k] != '\n');
+
 			do {
-				while(buffer[--i] != '\n');
-				k = i;
+				i = k;
 				while(buffer[--k] != '\n');
 				t = k;
 				while(buffer[++t] != '\t');
 				n = t;
 				while(buffer[++t] != '\t');
-				
 			} while(memcmp(buffer+start, buffer+k+1, max(end-start,n-k-1))!=0);
 
 			fwrite(&buffer[k+1], 1, t-k, stdout);
