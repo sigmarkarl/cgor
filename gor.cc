@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef LIBDEFLATE
 #include <zlib.h>
+#else
 #include <libdeflate.h>
+#endif
 #include <map>
 #include <vector>
 
