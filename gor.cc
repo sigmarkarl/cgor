@@ -1102,7 +1102,7 @@ int main( int argc, char* argv[] ) {
 			}
 
 			FILE* f = fopen( argv[filestart], "r" );
-			seek_gorz(f, stdout, chr, s, e);
+			ret = seek_gorz(f, stdout, chr, s, e);
 			fclose(f);
 		} else {
 			FILE* f = fopen(argv[1], "r");
