@@ -9,9 +9,16 @@ No support for writing column compressed .gorz.
 ## Prerequisite if using libdeflate
 
 Compile or Install libdeflate
-* Compile:  git clone https://github.com/ebiggers/libdeflate  
-            make CC=x86_64-w64-mingw32-gcc
-* On Mac: brew install libdeflate
+* Compile: 
+```bash
+ git clone https://github.com/ebiggers/libdeflate  
+make
+```
+
+* On Mac: 
+```bash
+brew install libdeflate
+```
 
 ## Compile
 
