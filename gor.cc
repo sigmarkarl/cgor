@@ -826,13 +826,33 @@ int decode(char* src, int off, char* dest, int destOffset, map<int, map<int, cha
 	return dp;
 }
 
+char	dst[32768];
+extern "C" int gorz_buffer(char* in, int size, char* out) {
+	int k = size-1;
+	while(--k >= 0 && in[k] != '\n');
+	int t = k;
+	while(in[++t] != '\t');
+	int n = t;
+	while(in[++t] != '\t');
+
+	int offset = t-k;
+	memcpy(in+k+1, out, offset);
+	out[offset] = 0;
+
+	size_t res = deflate(in, size, dst, sizeof(dst));
+	int sbsize = to7Bit(dst, res, out+offset+1);
+	int total = offset+sbsize+1;
+	out[total] = '\n';
+
+	return total+1;
+}
+
 extern "C" int write_gorz(FILE* in, FILE* out) {
 #ifdef LIBDEFLATE
 	c = libdeflate_alloc_compressor(1);
 	if (c == NULL) return 1;
 #endif
 	char	buffer[32768];
-	char	dst[32768];
 	char	enc[32768];
 	size_t lastread = fread(buffer, 1, sizeof(buffer), in);
 	int start = 0;
