@@ -834,7 +834,7 @@ extern "C" int write_gorz(FILE* in, FILE* out) {
 	char	buffer[32768];
 	char	dst[32768];
 	char	enc[32768];
-	size_t siz = fread(buffer, 1, sizeof(buffer), in);
+	size_t lastread = fread(buffer, 1, sizeof(buffer), in);
 	int start = 0;
 	while(buffer[start++] != '\n');
 	fwrite(buffer, 1, start, out);
@@ -842,15 +842,15 @@ extern "C" int write_gorz(FILE* in, FILE* out) {
 	int end = start;
 	while(buffer[++end] != '\t');
 
+	size_t siz = lastread;
 	while( siz > 0 ) {
 		int k = siz;
 		int i,t,n;
 
 		while(buffer[--k] != '\n');
-
 		do {
 			i = k;
-			while(buffer[--k] != '\n');
+			while(--k >= 0 && buffer[k] != '\n');
 			t = k;
 			while(buffer[++t] != '\t');
 			n = t;
@@ -870,7 +870,13 @@ extern "C" int write_gorz(FILE* in, FILE* out) {
 		memcpy(buffer, buffer+i+1, restlen);
 
 		start = 0;
-		siz = fread(buffer+restlen, 1, sizeof(buffer)-restlen, in)+restlen;
+		if(lastread > 0) lastread = fread(buffer+restlen, 1, sizeof(buffer)-restlen, in);
+
+		if(lastread > 0) {	
+			siz = lastread+restlen;
+		} else {
+			siz = restlen;
+		}
 		end = start;
 		while(end < siz-1 && buffer[++end] != '\t');
 	}
