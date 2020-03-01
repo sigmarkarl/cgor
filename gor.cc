@@ -827,24 +827,45 @@ int decode(char* src, int off, char* dest, int destOffset, map<int, map<int, cha
 }
 
 char	dst[32768];
+char	enc[32768];
+
+extern "C" int gorz_buffer_pos(char* in, int size, char* pos, int poslen, char* out) {
+	memcpy(out, pos, poslen);
+	out[poslen] = 0;
+
+	size_t res = deflate(in, size, dst, sizeof(dst));
+	int sbsize = to7Bit(dst, res, out+poslen+1);
+	int total = poslen+sbsize+1;
+	out[total] = '\n';
+
+	return total+1;
+}
+
 extern "C" int gorz_buffer(char* in, int size, char* out) {
 	int k = size-1;
 	while(--k >= 0 && in[k] != '\n');
 	int t = k;
 	while(in[++t] != '\t');
-	int n = t;
 	while(in[++t] != '\t');
 
 	int offset = t-k;
-	memcpy(in+k+1, out, offset);
-	out[offset] = 0;
+	return gorz_buffer_pos(in, size, in+k+1, offset, out);
+}
 
-	size_t res = deflate(in, size, dst, sizeof(dst));
-	int sbsize = to7Bit(dst, res, out+offset+1);
-	int total = offset+sbsize+1;
-	out[total] = '\n';
+extern "C" int gorz_file_pos(char* in, int size, char* pos, int poslen, FILE* out) {
+	int len = gorz_buffer_pos(in, size, pos, poslen, enc);
+	return fwrite(enc, 1, len, out);
+}
 
-	return total+1;
+extern "C" int gorz_file(char* in, int size, FILE* out) {
+	int k = size-1;
+	while(--k >= 0 && in[k] != '\n');
+	int t = k;
+	while(in[++t] != '\t');
+	while(in[++t] != '\t');
+
+	int offset = t-k;
+	return gorz_file_pos(in, size, in+k+1, offset, out);
 }
 
 extern "C" int write_gorz(FILE* in, FILE* out) {
@@ -853,7 +874,6 @@ extern "C" int write_gorz(FILE* in, FILE* out) {
 	if (c == NULL) return 1;
 #endif
 	char	buffer[32768];
-	char	enc[32768];
 	size_t lastread = fread(buffer, 1, sizeof(buffer), in);
 	int start = 0;
 	while(buffer[start++] != '\n');
@@ -877,14 +897,7 @@ extern "C" int write_gorz(FILE* in, FILE* out) {
 			while(buffer[++t] != '\t');
 		} while(memcmp(buffer+start, buffer+k+1, max(end-start,n-k-1))!=0);
 
-		fwrite(&buffer[k+1], 1, t-k, out);
-
-		size_t res = deflate(buffer+start, i+1-start, dst, sizeof(dst));
-		enc[0] = 0;
-		int sbsize = to7Bit(dst, res, enc+1)+1;
-		enc[sbsize] = '\n';
-
-		fwrite(enc, 1, sbsize+1, out);
+		gorz_file_pos(buffer+start, i+1-start, buffer+k+1, t-k, out);
 
 		int restlen = siz-i-1;
 		memcpy(buffer, buffer+i+1, restlen);
