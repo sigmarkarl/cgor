@@ -21,17 +21,17 @@
 #include <stdio.h>
 
 /**
- * Reads a file in gorz format to the out file
+ * Reads a file in gorz format and writes uncompressed out file (.gor)
  */
 extern "C" int read_gorz(FILE* in, FILE* out);
 
 /**
- * Seeks into a gorz to a given genomic position
+ * Seeks into a gorz to a given genomic position and writes to uncompressed out file (.gor)
  */
 extern "C" int seek_gorz(FILE* in, FILE* out, char* chr, int s, int e);
 
 /**
- * Reads a tab delimited text file in gor format and writes in gorz format
+ * Reads a tab delimited text file in gor format and writes in compressed gorz format
  */
 extern "C" int write_gorz(FILE* in, FILE* out);
 
