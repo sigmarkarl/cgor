@@ -9,6 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: Install libz-dev
+      run: sudo apt-get install libz-dev
     #- name: configure
     #  run: ./configure
     - name: make
