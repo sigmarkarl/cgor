@@ -21,6 +21,16 @@
 #include <stdio.h>
 
 /**
+ * Inflates src buffer to dst buffer
+ */
+extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen);
+
+/**
+ * Inflates src buffer to dst buffer
+ */
+extern "C" int inflateOffset(long long src, int srcOffset, int srcLen, long long dst, int dstLen);
+
+/**
  * Reads a file in gorz format and writes uncompressed out file (.gor)
  */
 extern "C" int read_gorz(FILE* in, FILE* out);

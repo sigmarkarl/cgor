@@ -33,8 +33,16 @@
 
 using namespace std;
 
+
+char	dst[32768];
+char	enc[32768];
+
 #ifndef LIBDEFLATE
-int inflate(const void *src, int srcLen, void *dst, int dstLen) {
+void init() {
+
+}
+
+extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen) {
     z_stream strm  = {0};
     strm.total_in  = strm.avail_in  = srcLen;
     strm.total_out = strm.avail_out = dstLen;
@@ -107,6 +115,12 @@ int deflate(const void *src, int srcLen, void *dst, int dstLen) {
 struct libdeflate_decompressor *d;
 struct libdeflate_compressor *c;
 
+void init() {
+	if(d == NULL) {
+		d = libdeflate_alloc_decompressor();
+	}
+}
+
 int inflate(const void *src, int srcLen, void *dst, int dstLen) {
 	size_t ret = -1;
     libdeflate_result res = libdeflate_zlib_decompress(d, src, srcLen, dst, dstLen, &ret);
@@ -171,6 +185,18 @@ int to7Bit(char* ba, int len, char* out) {
 	return reslen;
 }
 
+extern "C" int inflateOffset(long long src, int srcOffset, int srcLen, long long dst, int dstLen) {
+	init();
+	
+	char* srcptr = (char*)src;
+	srcptr = srcptr+srcOffset;
+
+	char* dstptr = (char*)dst;
+	//int newlen = to8BitInplace(srcptr, 0, srcLen);
+	int ret = inflate(srcptr, srcLen, dstptr, dstLen);
+	//fprintf(stderr, "bu %d %d", ret, newlen);
+	return ret;
+}
 struct searchresult {
 	long	fileoffset;
 	int 	siz;
@@ -826,9 +852,6 @@ int decode(char* src, int off, char* dest, int destOffset, map<int, map<int, cha
 	return dp;
 }
 
-char	dst[32768];
-char	enc[32768];
-
 extern "C" int gorz_buffer_pos(char* in, int size, char* pos, int poslen, char* out) {
 	memcpy(out, pos, poslen);
 	out[poslen] = 0;
@@ -1120,7 +1143,9 @@ extern "C" int seek_gorz(FILE* in, FILE* out, char* chr, int s, int e) {
 
 int main( int argc, char* argv[] ) {
 	int ret = 0;
-	if( strcmp( argv[1], "-c" ) == 0 ) {
+	if(argc==1) {
+		ret = read_gorz(stdin, stdout);
+	} else if( strcmp( argv[1], "-c" ) == 0 ) {
 		ret = write_gorz(stdin, stdout);
 	} else {
 		if( strcmp( argv[1], "-p" ) == 0 ) {
