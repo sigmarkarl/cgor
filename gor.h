@@ -21,25 +21,14 @@
 #include <stdio.h>
 
 /**
-<<<<<<< Updated upstream
  * Inflates src buffer to dst buffer
-=======
- * Inflates buffer to another
->>>>>>> Stashed changes
  */
 extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen);
 
 /**
-<<<<<<< Updated upstream
  * Inflates src buffer to dst buffer
  */
 extern "C" int inflateOffset(long long src, int srcOffset, int srcLen, long long dst, int dstLen);
-=======
- * Inflates buffer with offset to another
- */
-extern "C" int inflateOffset(const char *src, int srcOffset, int srcLen, char *dst, int dstLen);
-
->>>>>>> Stashed changes
 
 /**
  * Reads a file in gorz format and writes uncompressed out file (.gor)

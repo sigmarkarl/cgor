@@ -33,21 +33,14 @@
 
 using namespace std;
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 char	dst[32768];
 char	enc[32768];
 
 #ifndef LIBDEFLATE
-<<<<<<< Updated upstream
 void init() {
 
 }
 
-=======
->>>>>>> Stashed changes
 extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen) {
     z_stream strm  = {0};
     strm.total_in  = strm.avail_in  = srcLen;
@@ -131,28 +124,6 @@ extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen) {
 	size_t ret = -1;
     libdeflate_result res = libdeflate_zlib_decompress(d, src, srcLen, dst, dstLen, &ret);
     return ret;
-}
-
-extern "C" int inflateOffset(const char *src, int srcOffset, int srcLen, char *cdst, int dstLen) {
-	if(d==NULL) {
-		d = libdeflate_alloc_decompressor();
-		//fprintf(stderr, "duddi %lld\n", (long long)d);
-	}
-
-	//fprintf(stderr, "musinmin %d %d %d\n", srcOffset, srcLen, dstLen);
-
-	const char* in = (const char*)(src+srcOffset);
-	//fprintf(stderr, "sko %d %d %d\n", (int)in[0], (int)in[1], (int)in[2]);
-	memcpy(enc, in, srcLen);
-	//fprintf(stderr, "roota %d %d %d\n", (int)enc[0], (int)enc[1], (int)enc[2]);
-
-	size_t ret = -1;
-    libdeflate_result res = libdeflate_zlib_decompress(d, enc, srcLen, dst, sizeof(dst), &ret);
-	//fprintf(stderr,"super %d\n", ret);
-	//fprintf(stderr,"bi %d %d\n", dst[0], dst[1]);
-	memcpy(cdst,dst,ret);
-    return ret;
-	//return 10;
 }
 
 int deflate(const void *src, int srcLen, void *dst, int dstLen) {
