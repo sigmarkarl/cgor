@@ -23,7 +23,7 @@
 /**
  * Inflates src buffer to dst buffer
  */
-extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen);
+extern "C" int inflate_gor(const void *src, int srcLen, void *dst, int dstLen);
 
 /**
  * Inflates src buffer to dst buffer

@@ -41,7 +41,7 @@ void init() {
 
 }
 
-extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen) {
+extern "C" int inflate_gor(const void *src, int srcLen, void *dst, int dstLen) {
     z_stream strm  = {0};
     strm.total_in  = strm.avail_in  = srcLen;
     strm.total_out = strm.avail_out = dstLen;
@@ -75,7 +75,7 @@ extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen) {
     return ret;
 }
 
-int deflate(const void *src, int srcLen, void *dst, int dstLen) {
+int deflate_gor(const void *src, int srcLen, void *dst, int dstLen) {
     z_stream strm  = {0};
     strm.avail_in  = strm.avail_in  = srcLen;
     strm.avail_out = strm.avail_out = dstLen;
@@ -120,13 +120,13 @@ void init() {
 	}
 }
 
-extern "C" int inflate(const void *src, int srcLen, void *dst, int dstLen) {
+extern "C" int inflate_gor(const void *src, int srcLen, void *dst, int dstLen) {
 	size_t ret = -1;
     libdeflate_result res = libdeflate_zlib_decompress(d, src, srcLen, dst, dstLen, &ret);
     return ret;
 }
 
-int deflate(const void *src, int srcLen, void *dst, int dstLen) {
+int deflate_gor(const void *src, int srcLen, void *dst, int dstLen) {
 	return libdeflate_zlib_compress(c, src, srcLen, dst, dstLen);
 }
 #endif
@@ -192,7 +192,7 @@ extern "C" int inflateOffset(long long src, int srcOffset, int srcLen, long long
 
 	char* dstptr = (char*)dst;
 	//int newlen = to8BitInplace(srcptr, 0, srcLen);
-	int ret = inflate(srcptr, srcLen, dstptr, dstLen);
+	int ret = inflate_gor(srcptr, srcLen, dstptr, dstLen);
 	//fprintf(stderr, "bu %d %d", ret, newlen);
 	return ret;
 }
@@ -855,7 +855,7 @@ extern "C" int gorz_buffer_pos(char* in, int size, char* pos, int poslen, char* 
 	memcpy(out, pos, poslen);
 	out[poslen] = 0;
 
-	size_t res = deflate(in, size, dst, sizeof(dst));
+	size_t res = deflate_gor(in, size, dst, sizeof(dst));
 	int sbsize = to7Bit(dst, res, out+poslen+1);
 	int total = poslen+sbsize+1;
 	out[total] = '\n';
@@ -938,7 +938,8 @@ extern "C" int write_gorz(FILE* in, FILE* out) {
 	return 0;
 }
 
-extern "C" int read_gorz(FILE* in, FILE* out) {
+extern "C" int 
+read_gorz(FILE* in, FILE* out) {
 #ifdef LIBDEFLATE
 	d = libdeflate_alloc_decompressor();
 	if (d == NULL) return 1;
@@ -961,7 +962,7 @@ extern "C" int read_gorz(FILE* in, FILE* out) {
 		fwrite( buffer, 1, z+1, out );
 		int len = i-z-2;
 		int reslen = to8BitInplace( buffer, z+1, len );
-		int inf = inflate( buffer+z+1, reslen, dst, sizeof(dst) );
+		int inf = inflate_gor( buffer+z+1, reslen, dst, sizeof(dst) );
 		fwrite( dst, 1, inf, out );
 	} else {
 		fwrite( buffer, 1, i, out );
@@ -987,7 +988,7 @@ extern "C" int read_gorz(FILE* in, FILE* out) {
 
 		int prelen = end-start;
 		int len = to8BitInplace( buffer, start, end-start );
-		int inf = inflate( buffer+start, len, dst, sizeof(dst) );
+		int inf = inflate_gor( buffer+start, len, dst, sizeof(dst) );
 		if( inf > 0 ) {
 			if( z != -1 ) {
 				int siz = decode( dst, 0, zbuf, 0, NULL );
@@ -1027,7 +1028,7 @@ extern "C" int seek_gorz(FILE* in, FILE* out, char* chr, int s, int e) {
 		fwrite( buffer, 1, z+1, out );
 		int len = i-z-2;
 		int reslen = to8BitInplace( buffer, z+1, len );
-		int inf = inflate( buffer+z+1, reslen, dst, sizeof(dst) );
+		int inf = inflate_gor( buffer+z+1, reslen, dst, sizeof(dst) );
 		//fwrite( dst, 1, inf, stdout );
 	} else fwrite( buffer, 1, i, out );
 
@@ -1075,7 +1076,7 @@ extern "C" int seek_gorz(FILE* in, FILE* out, char* chr, int s, int e) {
 		}
 
 		int len = to8BitInplace( buffer, beg, end-beg );
-		int inf = inflate( buffer+beg, len, dst, sizeof(dst) );
+		int inf = inflate_gor( buffer+beg, len, dst, sizeof(dst) );
 
 		int start, endpos;
 		if( z != -1 ) {
@@ -1114,7 +1115,7 @@ extern "C" int seek_gorz(FILE* in, FILE* out, char* chr, int s, int e) {
 			end = i;
 
 			len = to8BitInplace( buffer, beg, end-beg );
-			inf = inflate( buffer+beg, len, dst, sizeof(dst) );
+			inf = inflate_gor( buffer+beg, len, dst, sizeof(dst) );
 			if( inf > 0 ) {
 				if( z != -1 ) {
 					inf = decode( dst, 0, zbuf, 0, NULL );
